@@ -1,0 +1,9 @@
+version: '3.6'
+services:
+  messaging:
+    image: node
+    tty: true
+    volumes:
+      - ./:/var/node
+    ports:
+      - '127.0.0.1:3010:8080'
