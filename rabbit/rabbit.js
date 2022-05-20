@@ -1,4 +1,4 @@
-function publish(server,queue,msg) {
+async function publish(server,queue,msg) {
     var amqp = require('amqplib/callback_api')
 
     amqp.connect('amqp://' + server, function(error0, connection) {

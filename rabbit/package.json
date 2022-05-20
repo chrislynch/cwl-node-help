@@ -1,14 +1,26 @@
 {
   "name": "cwl-rabbit",
   "version": "1.0.0",
-  "description": "",
+  "description": "CWL Helper for simple publish and consume of a RabbitMQ queue",
   "main": "rabbit.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Chris Lynch",
   "license": "ISC",
   "dependencies": {
     "amqplib": "^0.8.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrislynch/cwl-node-help.git"
+  },
+  "keywords": [
+    "rabbitmq"
+  ],
+  "bugs": {
+    "url": "https://github.com/chrislynch/cwl-node-help/issues"
+  },
+  "homepage": "https://github.com/chrislynch/cwl-node-help#readme"
 }

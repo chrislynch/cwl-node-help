@@ -1,0 +1,27 @@
+{
+  "name": "cwl-express",
+  "version": "1.0.1",
+  "description": "CWL Helper for Express",
+  "main": "express.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrislynch/cwl-node-help.git"
+  },
+  "author": "Chris Lynch",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/chrislynch/cwl-node-help/issues"
+  },
+  "homepage": "https://github.com/chrislynch/cwl-node-help#readme",
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "express": "^4.17.3",
+    "express-fileupload": "^1.3.1",
+    "express-session": "^1.17.2",
+    "fs": "^0.0.1-security",
+    "helmet": "^5.0.2"
+  }
+}
