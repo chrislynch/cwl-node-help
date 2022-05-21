@@ -42,7 +42,7 @@ function go(port = 3000){
     return app
 }
 
-function addDefaultHandler(app){
+function steady(app){
     /*
     app.all('*', (req,res,next) => {
         if (fs.existsSync(routefile)){
@@ -76,7 +76,8 @@ async function defaultHander(req,res) {
 
         if(route.go){    
             next = await route.go(req, res, data)
-            // console.log('Data: ' + "\n" + JSON.stringify(data,null,2))
+            req.session.data = data
+            console.log('Data: ' + "\n" + JSON.stringify(data,null,2))
         
             if(next !== undefined){
                 if(next.length > 0){
@@ -93,7 +94,9 @@ async function defaultHander(req,res) {
         
         if(fs.existsSync(templatefile)){
             template = fs.readFileSync(templatefile,'utf8')
-            html = ejs.render(template,data)
+            html = ejs.render(template,data,{
+                    root: process.cwd(),
+            })
             
         } else {
             console.log('Error: No template')
@@ -121,4 +124,4 @@ async function defaultHander(req,res) {
 }
 
 
-module.exports = { ready,addDefaultHandler,go }
+module.exports = { ready,steady,go }
