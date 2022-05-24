@@ -36,7 +36,11 @@ function ready(){
 
 function go(port = 3000){
     app.listen(port, () => {
+        console.log("=============================")
+        console.log("=============================")
         console.log(`App listening on port ${port}`)
+        console.log("=============================")
+        console.log("=============================")
     })
 
     return app
@@ -73,12 +77,12 @@ async function defaultHander(req,res) {
         var route = require(routefile);
         data = req.session.data
         if(data == undefined) { data = {} }
+        console.log('Start Data: ' + "\n" + JSON.stringify(data,null,2))
 
         if(route.go){    
             next = await route.go(req, res, data)
             req.session.data = data
-            console.log('Data: ' + "\n" + JSON.stringify(data,null,2))
-        
+            console.log('End Data: ' + "\n" + JSON.stringify(data,null,2))
             if(next !== undefined){
                 if(next.length > 0){
                     console.log('Redirection: ' + next)

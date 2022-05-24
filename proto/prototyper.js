@@ -3,7 +3,7 @@ const { v1: uuidv1, v4: uuidv4, } = require('uuid');
 /*
 var db = new sqlite3.Database(':memory:');
 */
-const options = {};
+const options = {"path":":memory:"};
 
 function path(newPath){
     if(newPath !== undefined){
