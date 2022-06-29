@@ -37,7 +37,7 @@ function connect(callback) {
             db.run(`
             CREATE TABLE proto (
                 guid TEXT,
-                "type" TEXT, class TEXT, template TEXT,
+                archetype TEXT, class TEXT, template TEXT,
                 name TEXT, uri TEXT, code TEXT,
                 status INTEGER, flag INTEGER, rank INTEGER, system INTEGER,
                 domain INTEGER, integration INTEGER, indexation INTEGER,
@@ -102,7 +102,7 @@ function save(obj,callback){
             db.run(`
                 INSERT INTO proto(
                     guid,
-                    type, class, template,
+                    archetype, class, template,
                     name, uri,
                     code, status, flag, rank,
                     system, domain, integration, indexation,
@@ -155,6 +155,7 @@ function load(guid,callback){
 
 function search(sql,params,callback){
     var objs = []
+    sql = "SELECT guid,data FROM proto " + sql
     console.log("Searching:" + sql)
     connect((db,err) => {
         db.each(sql, params, 
