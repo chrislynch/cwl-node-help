@@ -23,15 +23,18 @@ async function sendMail(from,to,subject,html){
 
   // create reusable transporter object using the default SMTP transport
   console.log(options)
-  let transporter = nodemailer.createTransport({
+  var transportOptions = {
     host: options.host,
     port: options.port,
     secure: options.secure, // true for 465, false for other ports
-    auth: {
+  }
+  if (options.user !== ''){
+    transportOptions.auth = {
       user: options.user, // generated ethereal user
       pass: options.pass
-    },
-  });
+    }
+  }
+  let transporter = nodemailer.createTransport(transportOptions);
 
   // send mail with defined transport object
   let info = await transporter.sendMail({
