@@ -22,7 +22,7 @@ async function sendMail(from,to,subject,html){
   // let testAccount = await nodemailer.createTestAccount();
 
   // create reusable transporter object using the default SMTP transport
-  console.log(options)
+  
   var transportOptions = {
     host: options.host,
     port: options.port,
@@ -45,11 +45,11 @@ async function sendMail(from,to,subject,html){
     html: html, // html body
   });
 
-  console.log("Message sent: %s", info.messageId);
+  // console.log("Message sent: %s", info.messageId);
   // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
 
   // Preview only available when sending through an Ethereal account
-  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+  // console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
   // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou..
 }
 
