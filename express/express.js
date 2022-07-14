@@ -65,6 +65,18 @@ function steady(){
     app.post('*', (req, res) => {
         defaultHander(req,res)
     })
+
+    app.put('*', (req, res) => {
+        defaultHander(req,res)
+    })
+
+    app.patch('*', (req, res) => {
+        defaultHander(req,res)
+    })
+
+    app.delete('*', (req, res) => {
+        defaultHander(req,res)
+    })
 }
 
 async function defaultHander(req,res) {  

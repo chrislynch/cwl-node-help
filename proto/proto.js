@@ -79,9 +79,11 @@ function prepare(obj){
     
     // Integer defaults
     integerProperties = ['status','flag','rank','system',
-                         'domain','integration','integration','indexation']
+                         'domain','integration','indexation']
     for(const i in integerProperties){
-        obj[integerProperties[i]] = 0
+        if(obj[integerProperties[i]] == undefined){
+            obj[integerProperties[i]] = 0
+        }
     }
     // Date defaults
     var now = new Date()
@@ -92,6 +94,7 @@ function prepare(obj){
     obj.updated = now
 }
 
+// TODO: Add error handling
 function save(obj,callback){
     connect((db,err) => {
         if(err == undefined){
@@ -100,7 +103,7 @@ function save(obj,callback){
                 
             // Save to the database
             db.run(`
-                INSERT INTO proto(
+                REPLACE INTO proto(
                     guid,
                     archetype, class, template,
                     name, uri,
@@ -136,27 +139,42 @@ function save(obj,callback){
     })
 }
 
+// TODO: Throw an error when there is more than 1 match?
+// NOTE: Isn't this impossible from the DB level?
 function load(guid,callback){
     var obj = {}
     console.log("Loading " + guid)
     connect((db,err) => {
         db.each("SELECT * FROM proto WHERE guid = ?", [guid], 
-                (err, row) => {
-                    obj = JSON.parse(row.data)    
-                },
-                (err,rows) => {
-                    console.log("Found " + rows + " rows")
-                    db.close(() => {
-                        callback(obj)
-                    })
-                });
+            (err, row) => {
+                obj = JSON.parse(row.data)    
+            },
+            (err,rows) => {
+                console.log("Found " + rows + " rows")
+                db.close(() => {
+                    callback(obj)
+                })
+            });
     })    
 }
 
+function remove(guid,callback){
+    connect((db,err) => {
+        db.run("DELETE FROM proto WHERE guid = ?", [guid], 
+                () => {
+                    callback(this)    
+                });
+    })
+
+}
+
+// TODO: Rewrite to use db.all
+/*
 function search(sql,params,callback){
     var objs = []
     sql = "SELECT guid,data FROM proto " + sql
     console.log("Searching:" + sql)
+    
     connect((db,err) => {
         db.each(sql, params, 
                 (err, row) => {
@@ -170,19 +188,67 @@ function search(sql,params,callback){
                 });
     })
 }
+*/
 
-function del(guid,callback){
-    connect((db,err) => {
-        db.run("DELETE FROM proto WHERE guid = ?", [guid], 
-                () => {
-                    callback(this)    
-                });
+function get(params, callback){
+    // Breakdown some get parameters
+    console.log('here')
+    whereClauses = []
+    whereValues = []
+    for (const key in params.where) {
+        const clause = params.where[key];
+        whereClauses.push(clause.field + ' ' + clause.operator + ' ? ')
+        whereValues.push(clause.value)
+    }
+    console.log(whereClauses)
+    console.log(whereValues)
+    whereClause = whereClauses.join(' AND ')
+    var objs = []
+    db.serialize(() => {
+        connect((db,err) => {
+            db.all("SELECT * FROM proto WHERE " + whereClause, whereValues,
+                function (err, rows) {
+                    var returnArray = []
+                    rows.forEach(row => {
+                        returnArray.push(JSON.parse(row.data))
+                    });
+                    callback(returnArray)
+                }
+            )
+        })
     })
-
 }
 
-module.exports = {path,load,save,search,del}
+// TODO: Add in some validation? (Or is this covered by prepare?)
+function post(obj,callback){
+    return save(obj,callback)
+}
 
-/*
+function patch(objPatch,callback){
+    if(objPatch.guid === undefined || objPatch.guid == ''){
+        callback({},new Error('PATCH requires an object with a guid'))
+    } else {
+        load(objPatch.guid, (objComplete) => {
+            if(objComplete.guid !== objPatch.guid){
+                callback({},new Error('Could not find guid ' + objPatch.guid))
+            } else {
+                for (const prop in objPatch) {
+                    objComplete[prop] = objPatch[prop]
+                }
+                save(objComplete,callback)
+            }
+        })
+    }
+}
 
-*/
+function del(objDelete,callback){
+    if(objDelete.guid === undefined || objDelete.guid == ''){
+        callback({},new Error('DELETE requires an object with a guid'))
+    } else {
+        remove(objDelete.guid,callback)
+    }
+}
+
+
+
+module.exports = {path, connect, get, post, patch, del}
