@@ -1,6 +1,7 @@
 const express = require('express')
 const session = require('express-session');
 const fileUpload = require('express-fileupload');
+const bodyParser = require('body-parser');
 
 const helmet = require("helmet");
 
@@ -15,6 +16,7 @@ function ready(){
 
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+    app.use(bodyParser.json({ extended: true }));
 
     app.use(session({
         resave: false, // don't save session if unmodified
@@ -46,7 +48,7 @@ function go(port = 3000){
     return app
 }
 
-function steady(app){
+function steady(){
     /*
     app.all('*', (req,res,next) => {
         if (fs.existsSync(routefile)){
@@ -63,6 +65,18 @@ function steady(app){
     app.post('*', (req, res) => {
         defaultHander(req,res)
     })
+
+    app.put('*', (req, res) => {
+        defaultHander(req,res)
+    })
+
+    app.patch('*', (req, res) => {
+        defaultHander(req,res)
+    })
+
+    app.delete('*', (req, res) => {
+        defaultHander(req,res)
+    })
 }
 
 async function defaultHander(req,res) {  
@@ -77,12 +91,12 @@ async function defaultHander(req,res) {
         var route = require(routefile);
         data = req.session.data
         if(data == undefined) { data = {} }
-        console.log('Start Data: ' + "\n" + JSON.stringify(data,null,2))
+        console.log('Start Data: ' + JSON.stringify(data,null,2))
 
         if(route.go){    
             next = await route.go(req, res, data)
             req.session.data = data
-            console.log('End Data: ' + "\n" + JSON.stringify(data,null,2))
+            console.log('End Data: ' + JSON.stringify(data,null,2))
             if(next !== undefined){
                 if(next.length > 0){
                     console.log('Redirection: ' + next)
@@ -103,22 +117,23 @@ async function defaultHander(req,res) {
             })
             
         } else {
-            console.log('Error: No template')
+            console.log('No template')
             html = ''
         }
 
-        res.send(
-            `<html>
-                <head>
-                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
-                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-                </head>
-                <body>
-            ` + html + `
-                </body>
-            </html>`
-        )
-        
+        if(html !== ''){
+            res.send(
+                `<html>
+                    <head>
+                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+                    </head>
+                    <body>
+                ` + html + `
+                    </body>
+                </html>`
+            )
+        }
 
     } else {
         console.log('Error: 404')
