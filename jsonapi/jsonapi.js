@@ -22,14 +22,26 @@ function options(){
   }
 }
 
-function jsonget(jsonObj,options) {
+function get(jsonObj,options) {
   // Load default options set if no options are set
   if(options === undefined){ options = options()}
   options.method = 'GET'
   options.body = JSON.stringify(jsonObj)
   request(options, function (error, response) {
     if (error) throw new Error(error);
-    console.log(response.body);
+    console.log(JSON.parse(response.body));
   });
 }
 
+function post(jsonObj,options) {
+  // Load default options set if no options are set
+  if(options === undefined){ options = options()}
+  options.method = 'POST'
+  options.body = JSON.stringify(jsonObj)
+  request(options, function (error, response) {
+    if (error) throw new Error(error);
+    console.log(JSON.parse(response.body));
+  });
+}
+
+module.exports = { get }
