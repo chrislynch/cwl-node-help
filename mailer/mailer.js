@@ -16,7 +16,7 @@ function option(key,value){
     return options[key]
 }
 
-async function sendMail(from,to,subject,html){
+async function sendMail(from,to,subject,html,attachments = []){
   // Generate test SMTP service account from ethereal.email
   // Only needed if you don't have a real mail account for testing
   // let testAccount = await nodemailer.createTestAccount();
@@ -37,13 +37,17 @@ async function sendMail(from,to,subject,html){
   let transporter = nodemailer.createTransport(transportOptions);
 
   // send mail with defined transport object
-  let info = await transporter.sendMail({
+  var message = {
     from: from, // sender address
     to: to, // list of receivers
     subject: subject, // Subject line
     text: htmlToFormattedText(html), // plain text body
     html: html, // html body
-  });
+    attachments: attachments // attachments as per https://nodemailer.com/message/attachments/
+  }
+  
+
+  let info = await transporter.sendMail(message);
 
   // console.log("Message sent: %s", info.messageId);
   // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>

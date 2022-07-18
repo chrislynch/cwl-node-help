@@ -122,3 +122,5 @@ function patch(obj,callback){
 function del(collection,guid){
     throw new Error('DELETE not yet implemented')
 }
+
+module.exports = { get, post}
