@@ -70,20 +70,62 @@ function steady(){
 async function defaultHander(req,res) {  
 
     var html = ''
-
+    var defaultRoute = undefined
+    var runTemplate = false
+    var defaultRouteFile = process.cwd() + '/routes/default.js' 
+    
+    if(fs.existsSync(defaultRouteFile)){
+        defaultRoute = require(defaultRouteFile)
+    }
     var routefile = process.cwd() + '/routes' + req.path + '.js'
     if(routefile == process.cwd() + '/routes/.js') { routefile = process.cwd() + '/routes/index.js' }
     console.log('Route: ' + routefile)  
+    if(routefile == defaultRouteFile){
+        console.log('Error: 401')
+        res.status(404).send("Direct access to /default not allowed")
+    }
 
-    if(fs.existsSync(routefile)){
-        var route = require(routefile);
+    if(fs.existsSync(routefile) || defaultRoute !== undefined){
+        if(fs.existsSync(routefile)){
+            var route = require(routefile);
+        } else {
+            var route = defaultRoute
+        }
         data = req.session.data
         if(data == undefined) { data = {} }
         console.log('Start Data: ' + JSON.stringify(data,null,2))
 
-        if(route.go){    
-            res.setHeader('Content-Type', 'application/json');
-            next = await route.go(req, res, data)
+        res.setHeader('Content-Type', 'application/json');
+        var foundMethod = undefined
+        console.log(req.method)
+        switch(req.method){
+            case 'GET':
+                if(route.get) { foundMethod = route.get}
+                break;
+            case 'POST':
+                if(route.post) { foundMethod = route.post}
+                break;
+        }
+        if(foundMethod == undefined){
+            if(route.go){ foundMethod = route.go}
+        }
+        if(foundMethod == undefined){
+            if(defaultRoute !== undefined){
+                switch(req.method){
+                    case 'GET':
+                        if(defaultRoute.get) { foundMethod = defaultRoute.get}
+                        break;
+                    case 'POST':
+                        if(defaultRoute.post) { foundMethod = defaultRoute.post}
+                        break;
+                }       
+            }
+            if(foundMethod == undefined){
+                if(defaultRoute.go){ foundMethod = defaultRoute.go}
+            }
+        }
+        if(foundMethod){    
+            next = await foundMethod(req, res, data, defaultRoute)
             req.session.data = data
             console.log('End Data: ' + JSON.stringify(data,null,2))
             if(next !== undefined){
@@ -93,8 +135,15 @@ async function defaultHander(req,res) {
                     return
                 }
             }
+            runTemplate = true
         }
 
+    } else {
+        console.log('Error: 404')
+        res.status(404).send("Page not found")
+    }
+
+    if(runTemplate){
         var templatefile = process.cwd() + '/views' + req.path + '.html'
         if(templatefile == process.cwd() + '/views/.html') { templatefile = process.cwd() + '/views/index.html'; }
         console.log('Template: ' + templatefile)
@@ -105,22 +154,17 @@ async function defaultHander(req,res) {
                     root: process.cwd(),
                     _with: false
             })
+            if(html !== ''){
+                res.header('Content-type', 'text/html')
+                res.send(
+                    html
+                )
+            }
             
         } else {
             console.log('No template')
             html = ''
         }
-
-        if(html !== ''){
-            res.header('Content-type', 'text/html')
-            res.send(
-                html
-            )
-        }
-
-    } else {
-        console.log('Error: 404')
-        res.status(404).send("Page not found")
     }
 
 }
