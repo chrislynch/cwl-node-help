@@ -12,7 +12,7 @@ const app = express()
 
 function ready(){
     
-    app.use(helmet())
+    // app.use(helmet())
 
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
@@ -126,7 +126,7 @@ async function defaultHander(req,res) {
         }
         if(foundMethod){    
             next = await foundMethod(req, res, data, defaultRoute)
-            req.session.data = data
+            if(req.session !== undefined){ req.session.data = data } else { data = {} }
             console.log('End Data: ' + JSON.stringify(data,null,2))
             if(next !== undefined){
                 if(next.length > 0){
