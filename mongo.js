@@ -139,8 +139,31 @@ function post(collection,obj,callback){
 }
 
 // Patches an object with some changes
-function patch(obj,callback){
-    throw new Error('PATCH not yet implemented')
+function patch(collection, guid, obj,callback){
+    // Load up the object
+    // Deepset it
+    // Save it
+    get(collection,{"guid":guid},(err,result) => {
+        if(err) callback(err)
+        switch(result.length){
+            case 1:
+                // We have our match
+                patchedObj = result.shift()
+                for (const key in obj) {
+                    patchedObj[key] = obj[key]
+                }
+                post(collection,patchedObj,(err,result) => {
+                    if(err) callback(err)
+                    callback(undefined,result)
+                })
+                break;
+            case 0:
+                callback(new Error('guid not found'))
+                break;
+            default:
+                callback(new Error('Multiple guid matches found'))
+        }
+    })
 }
 
 // Deletes an object
@@ -149,4 +172,4 @@ function del(collection,guid){
     throw new Error('DELETE not yet implemented')
 }
 
-module.exports = { get, post, deepset}
+module.exports = { get, post, patch, deepset}
