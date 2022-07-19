@@ -28,15 +28,11 @@ function ready(){
 
     app.use(express.static(process.cwd() + '/static'))
 
-    /*
-    routes = require('./routes.js')
-    routes.routes(app)
-    */
-
     return app
 }
 
-function go(port = 3000){
+function go(){
+    if(process.env['PORT'] !== undefined) { var port = process.env['PORT'] } else { var port = 3000}
     app.listen(port, () => {
         console.log("=============================")
         console.log("=============================")
@@ -49,14 +45,6 @@ function go(port = 3000){
 }
 
 function steady(){
-    /*
-    app.all('*', (req,res,next) => {
-        if (fs.existsSync(routefile)){
-            var bootstrap = require(routefile);
-        }
-        next()
-    })
-    */
 
     app.get('*', (req, res) => {
         defaultHander(req,res)
@@ -94,6 +82,7 @@ async function defaultHander(req,res) {
         console.log('Start Data: ' + JSON.stringify(data,null,2))
 
         if(route.go){    
+            res.setHeader('Content-Type', 'application/json');
             next = await route.go(req, res, data)
             req.session.data = data
             console.log('End Data: ' + JSON.stringify(data,null,2))
@@ -114,6 +103,7 @@ async function defaultHander(req,res) {
             template = fs.readFileSync(templatefile,'utf8')
             html = ejs.render(template,data,{
                     root: process.cwd(),
+                    _with: false
             })
             
         } else {
@@ -122,16 +112,9 @@ async function defaultHander(req,res) {
         }
 
         if(html !== ''){
+            res.header('Content-type', 'text/html')
             res.send(
-                `<html>
-                    <head>
-                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
-                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-                    </head>
-                    <body>
-                ` + html + `
-                    </body>
-                </html>`
+                html
             )
         }
 

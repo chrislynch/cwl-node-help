@@ -6,11 +6,37 @@
 
 const mongo = require('mongodb').MongoClient
 const { v1: uuidv1, v4: uuidv4, } = require('uuid');
+const { isNumber } = require("util")
 
 // TODO: Make the url configurable and throw an error if it is not there
 var url = 'mongodb://root:example@smr-mongo-1:27017'
 var dbName = 'SMR'
 
+function deepset(obj,path,value){
+    if(typeof path == 'object'){
+        for (const key in path) {
+            deepset(obj,key,path[key])
+        }
+    } else {
+        console.log("Setting " + path + " to " + value)
+        path = path.toString().split('.')
+        if(path.length > 1){
+            key = path[0]
+            if(obj[key] == undefined){
+                if(isNumber(key)){
+                    obj[key] = []
+                } else {
+                    obj[key] = {}
+                }
+            }
+            path.shift()
+            path = path.join('.')
+            deepset(obj[key],path,value)
+        } else {
+            obj[path[0]] = value
+        }
+    }
+}
 
 function prepare(obj){
     // guid
@@ -93,14 +119,14 @@ function post(collection,obj,callback){
                 if(obj.guid == undefined){
                     mydb.collection(collection).insertOne(obj,(err,res) => {
                         if(err) throw err
-                        console.log(obj._id + " saved to " + collection + " collection")
+                        console.log(obj.guid + " saved to " + collection + " collection")
                         db.close()
                         callback(null,obj)
                     })
                 } else {
                     mydb.collection(collection).replaceOne({ guid: obj.guid }, obj, { upsert: true}, (err,res) => {
                         if(err) throw err
-                        console.log(obj._id + " saved to " + collection + " collection")
+                        console.log(obj.guid + " saved to " + collection + " collection")
                         db.close()
                         callback(null,obj)
                     })
@@ -123,4 +149,4 @@ function del(collection,guid){
     throw new Error('DELETE not yet implemented')
 }
 
-module.exports = { get, post}
+module.exports = { get, post, deepset}
