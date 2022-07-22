@@ -74,6 +74,8 @@ async function defaultHander(req,res) {
     var runTemplate = false
     var defaultRouteFile = process.cwd() + '/routes/default.js' 
     
+
+    
     if(fs.existsSync(defaultRouteFile)){
         defaultRoute = require(defaultRouteFile)
     }
@@ -87,6 +89,7 @@ async function defaultHander(req,res) {
 
     if(fs.existsSync(routefile) || defaultRoute !== undefined){
         if(fs.existsSync(routefile)){
+            console.log('Loaded ' + routefile)
             var route = require(routefile);
         } else {
             var route = defaultRoute
@@ -100,28 +103,50 @@ async function defaultHander(req,res) {
         console.log(req.method)
         switch(req.method){
             case 'GET':
-                if(route.get) { foundMethod = route.get}
+                if(route.get) { 
+                    console.log('GET on route')
+                    foundMethod = route.get
+                }
                 break;
             case 'POST':
-                if(route.post) { foundMethod = route.post}
+                if(route.post) { 
+                    console.log('POST on route')
+                    foundMethod = route.post
+                }
                 break;
         }
         if(foundMethod == undefined){
-            if(route.go){ foundMethod = route.go}
+            if(route.go){ 
+                console.log('GO on route')
+                foundMethod = route.go
+            }
         }
         if(foundMethod == undefined){
             if(defaultRoute !== undefined){
                 switch(req.method){
                     case 'GET':
-                        if(defaultRoute.get) { foundMethod = defaultRoute.get}
+                        if(defaultRoute.get) { 
+                            console.log('GET on default')
+                            foundMethod = defaultRoute.get
+                        }
                         break;
                     case 'POST':
-                        if(defaultRoute.post) { foundMethod = defaultRoute.post}
+                        if(defaultRoute.post) { 
+                            console.log('POST on default')
+                            foundMethod = defaultRoute.post
+                        }
                         break;
                 }       
             }
-            if(foundMethod == undefined){
-                if(defaultRoute.go){ foundMethod = defaultRoute.go}
+            if(foundMethod !== undefined){
+                if(defaultRoute.go){ 
+                    console.log('GO on default')
+                    foundMethod = defaultRoute.go
+                }
+            } else {
+                // We have run out of choices. 404
+                console.log('Error: 404')
+                res.status(404).send("Page not found")
             }
         }
         if(foundMethod){    

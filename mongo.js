@@ -12,14 +12,14 @@ const { isNumber } = require("util")
 var url = 'mongodb://root:example@smr-mongo-1:27017'
 var dbName = 'SMR'
 
-function deepset(obj,path,value){
+function deepset(obj,path,value,sep = '.'){
     if(typeof path == 'object'){
         for (const key in path) {
             deepset(obj,key,path[key])
         }
     } else {
-        console.log("Setting " + path + " to " + value)
-        path = path.toString().split('.')
+        // console.log("Setting " + path + " to " + value)
+        path = path.toString().split(sep)
         if(path.length > 1){
             key = path[0]
             if(obj[key] == undefined){
@@ -30,8 +30,8 @@ function deepset(obj,path,value){
                 }
             }
             path.shift()
-            path = path.join('.')
-            deepset(obj[key],path,value)
+            path = path.join(sep)
+            deepset(obj[key],path,value,sep)
         } else {
             obj[path[0]] = value
         }
